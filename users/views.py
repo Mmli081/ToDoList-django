@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import AuthenticationForm
-from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth import logout, login as login_dj, authenticate
 from django.contrib.auth.decorators import login_required
 
 from .forms import RegisterForm
@@ -13,7 +15,7 @@ from .forms import RegisterForm
 def index(request):
     return HttpResponse(f"Hello {request.user.username}. You're at the users index.")
 
-
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)
@@ -22,13 +24,13 @@ def login(request):
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                login(request, user)
-                return redirect('') #TODO 
+                login_dj(request, user)
+                return redirect('index') #TODO
     else:
         form = AuthenticationForm()
     return render(request, 'users/login.html' , {'form': form})
 
-
+@csrf_exempt
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
