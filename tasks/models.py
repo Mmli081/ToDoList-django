@@ -21,33 +21,32 @@ days_choices = (('day', 'Day'),
 
 class Day(models.Model):
     date = models.DateField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='days')
 
     @staticmethod
-    def get_or_create(date):
+    def get_or_create(date, user):
         try:
-            day = Day.objects.get(date=date)
+            day = Day.objects.get(date=date, user=user)
         except Day.DoesNotExist:
-            day = Day.objects.create(date=date)
+            day = Day.objects.create(date=date, user=user)
         return day
 
-    def get_user_tasks(self, user):
-        self.tasks.set(Task.objects.filter(day=self, user=user))
+    def get_user_tasks(self):
         day_name = self.date.strftime('%A').lower()
-        multi_tasks = Task.objects.filter(~Q(type='day') & Q(user=user))
-        for task in multi_tasks:
-            if task.type in [day_name, 'everyday']:
-                Task.objects.create(
-                    title=task.title, user=user, day=self, description=task.description, type='day')
+        all_tasks = Task.objects.filter(user=self.user)
+        for task in all_tasks:
+            if task.type in ['everyday', day_name]:
+                Task.objects.create(title=task.title, user=self.user, day=self, description=task.description,)
         return self.tasks
 
     def __str__(self):
-        return self.date.strftime('%A')
+        return f"{self.date} from {self.user}"
 
 
 class Task(models.Model):
     title = models.CharField(max_length=200)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="days")
     day = models.ForeignKey(Day, on_delete=models.CASCADE, null=True, related_name="tasks")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
     description = models.TextField(null=True, blank=True)
     has_done = models.BooleanField(default=False)
     type = models.CharField(max_length=10, default="day", choices=days_choices)
