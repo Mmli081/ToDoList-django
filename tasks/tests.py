@@ -63,3 +63,18 @@ class TaskTestCase(TestCase):
         day = Day.get_or_create(date=date(2022, 8, 1), user=u)
         tasks = day.get_user_tasks()
         self.assertEqual(tasks.count(), 1)
+
+    def test_remove_task(self):
+        task = Task.objects.get(title="task3")
+        task.delete()
+        self.assertEqual(Task.objects.filter(title="task3").count(), 0)
+        u = User.objects.get(username="hooman")
+        day = Day.get_or_create(date=date(2022, 8, 2), user=u)
+        tasks = day.get_user_tasks()
+        self.assertEqual(tasks.count(), 1)
+        task = Task.objects.get(title="task5")
+        task.delete()
+        self.assertEqual(Task.objects.filter(title="task5").count(), 0)
+        day = Day.get_or_create(date=date(2022, 8, 1), user=u)
+        tasks = day.get_user_tasks()
+        self.assertEqual(tasks.count(), 0)

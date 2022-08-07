@@ -36,7 +36,7 @@ class Day(models.Model):
         all_tasks = Task.objects.filter(user=self.user)
         for task in all_tasks:
             if task.type in ['everyday', day_name]:
-                Task.objects.create(title=task.title, user=self.user, day=self, description=task.description,)
+                Task.objects.create(title=task.title+str(self.date), user=self.user, day=self, description=task.description,)
         return self.tasks
 
     def __str__(self):
@@ -51,5 +51,14 @@ class Task(models.Model):
     has_done = models.BooleanField(default=False)
     type = models.CharField(max_length=10, default="day", choices=days_choices)
 
+
+    def do(self):
+        self.has_done = True
+        self.save()
+
+    def undo(self):
+        self.has_done = False
+        self.save()
+    
     def __str__(self):
         return self.title
