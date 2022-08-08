@@ -34,9 +34,9 @@ class Day(models.Model):
     def get_user_tasks(self):
         day_name = self.date.strftime('%A').lower()
         all_tasks = Task.objects.filter(user=self.user)
-        for task in all_tasks:
-            if task.type in ['everyday', day_name]:
-                Task.objects.create(title=task.title+str(self.date), user=self.user, day=self, description=task.description,)
+        for task in all_tasks:  #TODO: this type of tasks are made everytime user requests for tasks
+            if task.type in ['everyday', day_name]: 
+                Task.objects.create(title=task.title+"-"+str(self.date), user=self.user, day=self, description=task.description,)
         return self.tasks
 
     def __str__(self):
@@ -50,6 +50,7 @@ class Task(models.Model):
     description = models.TextField(null=True, blank=True)
     has_done = models.BooleanField(default=False)
     type = models.CharField(max_length=10, default="day", choices=days_choices)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
     def do(self):
