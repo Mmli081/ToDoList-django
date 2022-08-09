@@ -34,13 +34,15 @@ class Day(models.Model):
     def get_user_tasks(self):
         day_name = self.date.strftime('%A').lower()
         all_tasks = Task.objects.filter(user=self.user)
-        for task in all_tasks:  #TODO: this type of tasks are made everytime user requests for tasks
+        for task in all_tasks:
             if task.type in ['everyday', day_name]: 
-                Task.objects.create(title=task.title+"-"+str(self.date), user=self.user, day=self, description=task.description,)
+                t = Task(title=task.title+"-"+str(self.date), user=self.user, day=self, description=task.description,)
+                if not t.title in [t.title for t in self.tasks.all()]:
+                    t.save()
         return self.tasks
 
     def __str__(self):
-        return f"{self.date} from {self.user}"
+        return f"{self.date} for {self.user}"
 
 
 class Task(models.Model):

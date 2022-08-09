@@ -25,7 +25,8 @@ class TaskCreateAPI(CreateAPIView):
     serializer_class = TaskCreateSerializer
 
     def perform_create(self, serializer):
-        day = Day.get_or_create(create_date(self.request.data.get('day')), self.request.user)
+        str_date = self.request.data.get('day')
+        day = Day.get_or_create(create_date(str_date), self.request.user) if str_date else None
         serializer.save(user=self.request.user, day=day)
 
 
